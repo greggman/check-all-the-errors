@@ -1,0 +1,91 @@
+#!/usr/bin/env node
+
+/* eslint-env node */
+
+const fs = require('fs');
+const Runner = require('../index');
+const colorSupport = require('color-support') || {};
+const c = require('ansi-colors');
+c.enabled = colorSupport.hasBasic;
+const makeOptions = require('optionator');
+
+const optionSpec = {
+  options: [
+    { option: 'help', alias: 'h', type: 'Boolean', description: 'displays help' },
+    { option: 'port', alias: 'p', type: 'Int',     description: 'port', default: '8080' },
+    { option: 'timeout',          type: 'Int',     description: 'the default timeout', default: '5000' },
+  ],
+  prepend: 'Usage: check-all-the-errors [options] [path-to-serve] [subpath]',
+  helpStyle: {
+    typeSeparator: '=',
+    descriptionSeparator: ' : ',
+    initialIndent: 4,
+  },
+};
+const optionator = makeOptions(optionSpec);
+
+let args;
+try {
+  args = optionator.parse(process.argv);
+} catch (e) {
+  console.error(e);
+  printHelp();
+}
+
+function printHelp() {
+  console.log(optionator.generateHelp());
+  process.exit(1);  // eslint-disable-line
+}
+
+if (args.help || args._.length !== 2) {
+  printHelp();
+}
+
+const baseDir = args._[0];
+const scanDir = args._[1];
+
+const files = fs.readdirSync(`${baseDir}/${scanDir}`).filter(v => v.endsWith('.html'));
+
+const logColor = (color, ...args) => {
+  console.log(c[color]([...args].join(' ')));
+};
+
+const log = (...args) => {
+  logColor('gray', ...args);
+};
+const error = (...args) => {
+  logColor('red', ...args);
+};
+
+const options = {
+  dir: baseDir,
+  port: args.port,
+  timeout: args.timeout,
+  urls: files.map(v => `http://localhost:${args.port}/${scanDir}/${v}`),
+};
+const r = new Runner(options);
+r.on('load', (e) => log('load:', e.url));
+r.on('idle', (e) => log('done:', e.url));
+r.on('error', (e) => {
+  switch (e.type) {
+    case 'msg':
+      error('error msg:', e.url, e.type, e.text, e.msg);
+      break;
+    case 'exception':
+      error('exception:', e.url, e.type, e.error);
+      break;
+    case 'error':
+      error('error:', e.url, e.type, e.error);
+      break;
+    case 'pageerror':
+      error('pageerror:', e.url, e.type, e.error);
+      break;
+    default:
+      throw new Error('unhandled error type');
+  }
+});
+r.on('finish', () => {
+  log('---done---');
+  process.exit(0);  // eslint-disable-line no-process-exit
+});
+

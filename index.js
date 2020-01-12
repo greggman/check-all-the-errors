@@ -1,13 +1,9 @@
-#!/usr/bin/env node
-
-/* global require, __dirname */
+/* eslint-env node */
 
 const puppeteer = require('puppeteer');
-const path = require('path');
 const express = require('express');
 const EventEmitter = require('events');
 const app = express();
-const port = 3000;
 
 class Runner extends EventEmitter {
   constructor(options) {
@@ -15,14 +11,14 @@ class Runner extends EventEmitter {
     process.nextTick(() => this._start(options));
   }
   _start(options) {
-    const {dir, port, urls} = options;
+    const {dir, port, urls, timeout} = options;
     app.use(express.static(dir));
     const server = app.listen(port, () => {
       console.log(`Example app listening on port ${port}!`);
       test.call(this, port);
     });
 
-    async function test(port) {
+    async function test() {
       console.log('launching puppeteer');
       const browser = await puppeteer.launch();
       const page = await browser.newPage();
@@ -32,7 +28,13 @@ class Runner extends EventEmitter {
         // Total Hack!
         console.log(...msg.args().map(v => v.toString().substr(9)));
         if (msg.type() === 'error') {
-          this.emit('error', {type: 'msg', url, currentURL, msg: [...msg.args()].join(' ')});
+          this.emit('error', {
+            type: 'msg',
+            url: currentURL,
+            location: msg.location(),
+            text: msg.text(),
+            msg: [...msg.args().map(v => v.toString())].join(' '),
+          });
         }
       });
 
@@ -47,7 +49,7 @@ class Runner extends EventEmitter {
         currentURL = url;
         this.emit('load', {url});
         try {
-          await page.goto(url, {waitUntil: 'networkidle2', timeout: 5000});
+          await page.goto(url, {waitUntil: 'networkidle2', timeout});
         } catch (e) {
           this.emit('error', {type: 'exception', url: currentURL, error: e});
         }
