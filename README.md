@@ -16,22 +16,33 @@ As it is now you just give it a base path and a sub path. Example
 check-all-the-errors /Users/me/myproject foobar
 ```
 
-Which will serve the older `/Users/me/myproject` and test all the
+Which will serve the folder `/Users/me/myproject` and test all the
 `.html` files in `/Users/me/myproject/foobar` by loading them as
 `http://localhost:8080/foobar/somepage.html`.
 
-The point is say you update a dependency then you run this script
+The point is say you update a dependency then you can run this script
 and see if anything on your site broke.
 
 I suspect it's of limited use. Most complex sites have a real testing
 suite and require far more manipulation of pages (clicking buttons etc)
 but for a mostly static site something simple like this might be useful.
 
-Maybe in the future can add per page function to manipulate the pages.
+Maybe in the future I can add per page functions to manipulate the pages.
 
 **Important**: It's not currently working on pages with `requestAnimationFrame`
  loops and I/O (loading images, other files) as there is a bug with puppeteer or
  an issue in the way I'm using it.
 
+## Installation
+
+```
+npm install -g check-all-the-errors
+```
+
+## Usage
+
+```
+check-all-the-errors [options] basepath subpath
+```
 
 
