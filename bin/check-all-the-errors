@@ -15,6 +15,7 @@ const optionSpec = {
     { option: 'port', alias: 'p',    type: 'Int',     description: 'port', default: '8080' },
     { option: 'timeout',             type: 'Int',     description: 'the default timeout', default: '5000' },
     { option: 'verbose', alias: 'v', type: 'Boolean', description: 'print console.log from browser' },
+    { option: 'follow-links',        type: 'String',  description: 'follow links', enum: ['local', 'remote', 'both'] },
   ],
   prepend: 'Usage: check-all-the-errors [options] [path-to-serve] [subpath]',
   helpStyle: {
@@ -58,13 +59,10 @@ const error = (...args) => {
   logColor('red', ...args);
 };
 
-const options = {
+const options = Object.assign({}, args, {
   dir: baseDir,
-  port: args.port,
-  timeout: args.timeout,
-  verbose: args.verbose,
   urls: files.map(v => `http://localhost:${args.port}/${scanDir}/${v}`),
-};
+});
 let numErrors = 0;
 const r = new Runner(options);
 r.on('load', (e) => log('load:', e.url));
@@ -83,6 +81,9 @@ r.on('error', (e) => {
       break;
     case 'pageerror':
       error('pageerror:', e.url, e.type, e.error);
+      break;
+    case 'badlink':
+      error('missing link:', e.url, `\n  --linked from--\n  ${e.links.join('\n  ')}`);
       break;
     default:
       throw new Error('unhandled error type');

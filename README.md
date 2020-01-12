@@ -45,4 +45,12 @@ npm install -g check-all-the-errors
 check-all-the-errors [options] basepath subpath
 ```
 
+* `--help` displays help
+* `--port=<num>` port (default: 8080)
+* `--timeout=<ms>` the default timeout in ms (default: 5000)
+* `--verbose` print console.log from browser
+* `--follow-links=<type>` follow links (local, remote, both
+
+  note: local links will be loaded and checked for errors,
+  remote links will only be checked for a valid response.
 
