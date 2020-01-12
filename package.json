@@ -4,7 +4,9 @@
   "description": "Load a bunch of pages, check for errors",
   "main": "index.js",
   "scripts": {
-    "start": "node bin/check-all-the-errors"
+    "start": "node bin/check-all-the-errors",
+    "lint": "eslint --ext .js --ext .html .",
+    "pre-push": "npm run lint"
   },
   "keywords": [
     "errors",
