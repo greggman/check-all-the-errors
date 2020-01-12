@@ -13,8 +13,9 @@
       ],
       "program": "${workspaceFolder}/bin/check-all-the-errors",
       "args": [
-        "../webgl-fundamentals",
-        "webgl"
+        "--follow-links=local",
+        "../webgl-fundamentals/out",
+        "webgl/lessons"
       ]
     }
   ]
