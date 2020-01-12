@@ -63,10 +63,12 @@ const options = {
   timeout: args.timeout,
   urls: files.map(v => `http://localhost:${args.port}/${scanDir}/${v}`),
 };
+let numErrors = 0;
 const r = new Runner(options);
 r.on('load', (e) => log('load:', e.url));
-r.on('idle', (e) => log('done:', e.url));
+// r.on('idle', (e) => log('done:', e.url));
 r.on('error', (e) => {
+  ++numErrors;
   switch (e.type) {
     case 'msg':
       error('error msg:', e.url, e.type, e.text, e.msg);
@@ -86,6 +88,6 @@ r.on('error', (e) => {
 });
 r.on('finish', () => {
   log('---done---');
-  process.exit(0);  // eslint-disable-line no-process-exit
+  process.exit(numErrors ? 1 : 0);  // eslint-disable-line no-process-exit
 });
 
