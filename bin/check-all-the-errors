@@ -11,9 +11,10 @@ const makeOptions = require('optionator');
 
 const optionSpec = {
   options: [
-    { option: 'help', alias: 'h', type: 'Boolean', description: 'displays help' },
-    { option: 'port', alias: 'p', type: 'Int',     description: 'port', default: '8080' },
-    { option: 'timeout',          type: 'Int',     description: 'the default timeout', default: '5000' },
+    { option: 'help', alias: 'h',    type: 'Boolean', description: 'displays help' },
+    { option: 'port', alias: 'p',    type: 'Int',     description: 'port', default: '8080' },
+    { option: 'timeout',             type: 'Int',     description: 'the default timeout', default: '5000' },
+    { option: 'verbose', alias: 'v', type: 'Boolean', description: 'print console.log from browser' },
   ],
   prepend: 'Usage: check-all-the-errors [options] [path-to-serve] [subpath]',
   helpStyle: {
@@ -61,6 +62,7 @@ const options = {
   dir: baseDir,
   port: args.port,
   timeout: args.timeout,
+  verbose: args.verbose,
   urls: files.map(v => `http://localhost:${args.port}/${scanDir}/${v}`),
 };
 let numErrors = 0;

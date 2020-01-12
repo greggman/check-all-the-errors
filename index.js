@@ -11,7 +11,7 @@ class Runner extends EventEmitter {
     process.nextTick(() => this._start(options));
   }
   _start(options) {
-    const {dir, port, urls, timeout} = options;
+    const {dir, port, urls, timeout, verbose} = options;
     app.use(express.static(dir));
     const server = app.listen(port, () => {
       console.log(`Example app listening on port ${port}!`);
@@ -26,7 +26,9 @@ class Runner extends EventEmitter {
       let currentURL;
       page.on('console', (msg) => {
         // Total Hack!
-        console.log(...msg.args().map(v => v.toString().substr(9)));
+        if (verbose) {
+          console.log(...msg.args().map(v => v.toString().substr(9)));
+        }
         if (msg.type() === 'error') {
           this.emit('error', {
             type: 'msg',
