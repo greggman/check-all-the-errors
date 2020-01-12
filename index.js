@@ -20,7 +20,25 @@ class Runner extends EventEmitter {
 
     async function test() {
       console.log('launching puppeteer');
-      const browser = await puppeteer.launch();
+      let browser = await puppeteer.launch({
+        handleSIGINT: false,
+      });
+
+      const cleanup = async() => {
+        if (!browser) {
+          return;
+        }
+
+        const b = browser;
+        browser = undefined;
+        await b.close();
+        server.close();
+      };
+      process.on('SIGINT', async() => {
+        await cleanup();
+        process.exit(0);  // eslint-disable-line no-process-exit
+      });
+
       const page = await browser.newPage();
 
       let currentURL;
@@ -58,8 +76,8 @@ class Runner extends EventEmitter {
         this.emit('idle', {url, page});
       }
 
-      await browser.close();
-      server.close();
+      await page.close();
+      await cleanup();
       this.emit('finish');
     }
   }
