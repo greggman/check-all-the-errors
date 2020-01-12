@@ -5,12 +5,16 @@ const express = require('express');
 const EventEmitter = require('events');
 const app = express();
 const debug = require('debug')('check-all-the-things');
+const fetch = require('node-fetch');
 
 class UrlInfo {
   constructor(url) {
     this.url = url;
     this.linkedFrom = new Set();
     this.found = false;
+  }
+  get href() {
+    return this.url.href;
   }
   addLink(url) {
     this.linkedFrom.add(url);
@@ -91,16 +95,21 @@ class Runner extends EventEmitter {
         return `${url.origin}${url.pathname}`;
       }
 
-      function getLocalUrlInfo(url) {
-        const pathname = fullPathname(url);
-        let urlInfo = localURLInfoMap.get(pathname);
-        const isNew = !urlInfo;
-        if (isNew) {
-          urlInfo = new UrlInfo(url);
-          localURLInfoMap.set(pathname, urlInfo);
-        }
-        return {isNew, urlInfo};
+      function getUrlInfoFn(urlInfoMap) {
+        return function(url) {
+          const pathname = fullPathname(url);
+          let urlInfo = urlInfoMap.get(pathname);
+          const isNew = !urlInfo;
+          if (isNew) {
+            urlInfo = new UrlInfo(url);
+            urlInfoMap.set(pathname, urlInfo);
+          }
+          return {isNew, urlInfo};
+        };
       }
+
+      const getLocalUrlInfo = getUrlInfoFn(localURLInfoMap);
+      const getRemoteUrlInfo = getUrlInfoFn(remoteURLInfoMap);
 
       async function addLinks(pageUrl, page, urls) {
         const elemHandles = await page.$$('a');
@@ -117,7 +126,6 @@ class Runner extends EventEmitter {
           }
           debug('checking:', href);
           const linkURL = new URL(href, pagePathname);
-          const linkPathname = fullPathname(linkURL);
           const isLocalURL = pageURL.origin === linkURL.origin;
           if (isLocalURL) {
             debug('  is local:', href);
@@ -132,9 +140,8 @@ class Runner extends EventEmitter {
             }
           } else {
             debug('  is remote:', href);
-            if (!remoteURLInfoMap.has(linkPathname)) {
-              remoteURLInfoMap.set(linkPathname, new UrlInfo(linkURL));
-            }
+            const {urlInfo} = getRemoteUrlInfo(linkURL);
+            urlInfo.addLink(pageURL);
           }
         }
       }
@@ -162,20 +169,34 @@ class Runner extends EventEmitter {
         this.emit('idle', {url: urlString, page});
       }
 
-      for (const [linkPathname, urlInfo] of localURLInfoMap) {
-        if (!urlInfo.found) {
-          this.emit('error', {
-            type: 'badlink',
-            url: linkPathname,
-            links: urlInfo.links(),
-          });
+      const reportMissingLinks = (urlInfoMap) => {
+        for (const [linkPathname, urlInfo] of urlInfoMap) {
+          if (!urlInfo.found) {
+            this.emit('error', {
+              type: 'badlink',
+              url: linkPathname,
+              links: urlInfo.links(),
+            });
+          }
         }
-      }
+      };
+
+      reportMissingLinks(localURLInfoMap);
 
       if (followRemote) {
-        for (const [linkPathname /*, urlInfo */] of remoteURLInfoMap.entries()) {
-          console.log('remote:', linkPathname);
+        for (const [/* linkPathname */, urlInfo] of remoteURLInfoMap.entries()) {
+          this.emit('load', {url: urlInfo.href});
+          try {
+            const res = await fetch(urlInfo.href, {method: 'HEAD'});
+            if (res.ok) {
+              urlInfo.setFound();
+            }
+          } catch (e) {
+            //
+          }
         }
+
+        reportMissingLinks(remoteURLInfoMap);
       }
 
       await page.close();
