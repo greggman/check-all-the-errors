@@ -150,7 +150,7 @@ class Runner extends EventEmitter {
         this.emit('load', {url: urlString});
         try {
           const result = await page.goto(urlString, {waitUntil: 'networkidle2', timeout});
-          if (result.status() === 200) {
+          if (result.status() >= 200 && result.status() <= 299) {
             urlInfo.setFound(true);
             if (followLinks !== 'none') {
               await addLinks(urlString, page, urls);
