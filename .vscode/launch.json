@@ -11,7 +11,11 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "program": "${workspaceFolder}/test.js"
+      "program": "${workspaceFolder}/bin/check-all-the-errors",
+      "args": [
+        "../webgl-fundamentals",
+        "webgl"
+      ]
     }
   ]
 }
