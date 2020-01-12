@@ -83,7 +83,7 @@ r.on('error', (e) => {
       error('pageerror:', e.url, e.type, e.error);
       break;
     case 'badlink':
-      error('missing link:', e.url, `\n  --linked from--\n  ${e.links.join('\n  ')}`);
+      error('missing link:', e.url, `  [linked from]\n  ${e.links.join('\n  ')}`);
       break;
     default:
       throw new Error('unhandled error type');
