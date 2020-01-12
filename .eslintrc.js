@@ -3,11 +3,13 @@ module.exports = {
     "browser": true,
     "es6": true,
   },
+  "ignorePatterns": [
+    "fail-script-syntax-error.html"
+  ],
   "parserOptions": {
     "sourceType": "module",
     "ecmaVersion": 8,
     "ecmaFeatures": {
-      "jsx": true
     },
   },
   "plugins": [
