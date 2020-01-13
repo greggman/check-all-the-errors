@@ -21,7 +21,19 @@ const optionSpec = {
     { option: 'ignore-pattern',      type: '[String]', description: 'glob to ignore', concatRepeatedArrays: true },
     { option: 'dry-run',             type: 'Boolean',  description: 'show the list of files to check and exit'},
   ],
-  prepend: 'Usage: check-all-the-errors [options] path-to-serve [subpath]',
+  prepend: `Usage: check-all-the-errors [options] path-to-serve [...glob]
+
+NOTE: all globs and ignore-patterns are relative to path-to-serve
+which means you generally need to quote them so the shell does not
+expand them in place.
+
+examples:
+
+  check-all-the-errors somedir              # eqv: somedir/*.html
+  check-all-the-errors somedir "*.html"     # eqv: somedir/*.html
+  check-all-the-errors somedir "**/*.html"  # eqv: somedir/**/*.html
+  check-all-the-errors somedir "foo/*.html" # eqv: somedir/foo/*.html
+  `,
   helpStyle: {
     typeSeparator: '=',
     descriptionSeparator: ' : ',
