@@ -2,20 +2,24 @@
 
 /* eslint-env node */
 
-const fs = require('fs');
+const path = require('path');
 const Runner = require('../index');
 const colorSupport = require('color-support') || {};
+const makeOptions = require('optionator');
+const glob = require('glob');
+const ignore = require('ignore');
 const c = require('ansi-colors');
 c.enabled = colorSupport.hasBasic;
-const makeOptions = require('optionator');
 
 const optionSpec = {
   options: [
-    { option: 'help', alias: 'h',    type: 'Boolean', description: 'displays help' },
-    { option: 'port', alias: 'p',    type: 'Int',     description: 'port', default: '8080' },
-    { option: 'timeout',             type: 'Int',     description: 'the default timeout', default: '5000' },
-    { option: 'verbose', alias: 'v', type: 'Boolean', description: 'print console.log from browser' },
-    { option: 'follow-links',        type: 'String',  description: 'follow links', enum: ['local', 'remote', 'both', 'none'], default: 'none' },
+    { option: 'help', alias: 'h',    type: 'Boolean',  description: 'displays help' },
+    { option: 'port', alias: 'p',    type: 'Int',      description: 'port', default: '8080' },
+    { option: 'timeout',             type: 'Int',      description: 'the default timeout', default: '5000' },
+    { option: 'verbose', alias: 'v', type: 'Boolean',  description: 'print console.log from browser' },
+    { option: 'follow-links',        type: 'String',   description: 'follow links', enum: ['local', 'remote', 'both', 'none'], default: 'none' },
+    { option: 'ignore-pattern',      type: '[String]', description: 'glob to ignore', concatRepeatedArrays: true },
+    { option: 'dry-run',             type: 'Boolean',  description: 'show the list of files to check and exit'},
   ],
   prepend: 'Usage: check-all-the-errors [options] path-to-serve [subpath]',
   helpStyle: {
@@ -36,17 +40,30 @@ try {
 
 function printHelp() {
   console.log(optionator.generateHelp());
-  process.exit(1);  // eslint-disable-line
+  process.exit(1);  // eslint-disable-line no-process-exit
 }
 
-if (args.help || args._.length < 1 || args._.length > 2) {
+if (args.help || args._.length < 1) {
   printHelp();
 }
 
-const baseDir = args._[0];
-const scanDir = args._[1] ? `/${args._[1]}` : '';
+const baseDir = args._.shift();
+const scanDirs = args._.length ? args._ : ['*.html'];
 
-const files = fs.readdirSync(`${baseDir}${scanDir}`).filter(v => v.endsWith('.html'));
+const igFilter = ignore().add(args.ignorePattern || []).createFilter();
+const filenames = new Set();
+const globOptions = {nodir: true};
+for (const scanDir of scanDirs) {
+  glob.sync(path.join(baseDir, scanDir), globOptions)
+      .map(v => path.relative(baseDir, v))
+      .filter(v => igFilter(v))
+      .forEach(v => filenames.add(v));
+}
+
+if (args.dryRun) {
+  console.log(Array.from(filenames).join('\n'));
+  process.exit(0);  // eslint-disable-line no-process-exit
+}
 
 const logColor = (color, ...args) => {
   console.log(c[color]([...args].join(' ')));
@@ -61,7 +78,7 @@ const error = (...args) => {
 
 const options = Object.assign({}, args, {
   dir: baseDir,
-  hrefs: files.map(v => `http://localhost:${args.port}${scanDir}/${v}`),
+  hrefs: Array.from(filenames).map(v => `http://localhost:${args.port}/${v}`),
 });
 let numErrors = 0;
 const r = new Runner(options);
