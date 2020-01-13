@@ -1,6 +1,6 @@
 {
   "name": "check-all-the-errors",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Load a bunch of pages, check for errors",
   "main": "index.js",
   "scripts": {
