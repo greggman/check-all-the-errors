@@ -13,12 +13,12 @@ for errors or warnings to ignore, different timeouts, etc...
 As it is now you just give it a base path and an optional sub path. Example
 
 ```
-check-all-the-errors /Users/me/myproject foobar
+check-all-the-errors /Users/me/three.js "examples/*.html"
 ```
 
-Which will serve the folder `/Users/me/myproject` and test all the
-`.html` files in `/Users/me/myproject/foobar` by loading them as
-`http://localhost:8080/foobar/somepage.html`.
+Which will serve the folder `/Users/me/three.js` and test all the
+`.html` files in `/Users/me/three.js/examples` by loading them as
+`http://localhost:8080/example/somepage.html`.
 
 The point is say you update a dependency then you can run this script
 and see if anything on your site broke.
@@ -38,14 +38,31 @@ npm install -g check-all-the-errors
 ## Usage
 
 ```
-check-all-the-errors [options] basepath [subpath]
+check-all-the-errors [options] path-to-serve [...glob]
 ```
+
+**NOTE**: all globs and ignore-patterns are relative to `path-to-serve`
+which means you generally need to quote them so the shell does not
+expand them in place.
+
+examples:
+
+```
+check-all-the-errors somedir              # eqv: somedir/*.html
+check-all-the-errors somedir "*.html"     # eqv: somedir/*.html
+check-all-the-errors somedir "**/*.html"  # eqv: somedir/**/*.html
+check-all-the-errors somedir "foo/*.html" # eqv: somedir/foo/*.html
+```
+
+### Options
 
 * `--help` displays help
 * `--port=<num>` port (default: 8080)
 * `--timeout=<ms>` the default timeout in ms (default: 5000)
+* `--ignore-pattern=<glob>` a glob pattern to ignore (see glob node)
 * `--verbose` print console.log from browser
 * `--follow-links=<type>` follow links (local, remote, both, none)
+* `--dry-run` just print the initial list of files.
 
   note: local links will be loaded and checked for errors,
   remote links will only be checked for a valid response (200-299).
