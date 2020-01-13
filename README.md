@@ -29,10 +29,6 @@ but for a mostly static site something simple like this might be useful.
 
 Maybe in the future I can add per page functions to manipulate the pages.
 
-**Important**: It's not currently working on pages with `requestAnimationFrame`
- loops and I/O (loading images, other files) as there is a bug with puppeteer or
- an issue in the way I'm using it.
-
 ## Installation
 
 ```
