@@ -13,7 +13,7 @@ class UrlInfo {
   constructor(url) {
     this.url = url;
     this.linkedFrom = new Set();
-    this.found = false;
+    this.responseStatus = -1;
   }
   get href() {
     return this.url.href;
@@ -24,8 +24,17 @@ class UrlInfo {
   links() {
     return Array.from(this.linkedFrom);
   }
-  setFound() {
-    this.found = true;
+  ok() {
+    return this.responseStatus >= 200 && this.responseStatus <= 299;
+  }
+  get status() {
+    return this.responseStatus;
+  }
+  isStatusSet() {
+    return this.responseStatus !== -1;
+  }
+  setStatus(status) {
+    this.responseStatus = status;
   }
 }
 
@@ -35,11 +44,38 @@ class Runner extends EventEmitter {
     process.nextTick(() => this._start(options));
   }
   _start(options) {
-    const {dir, port, urls, timeout, verbose, followLinks} = options;
+    // Annoying but url of means a string but there is also URL.
+    // Let's try to keep the code so href = a string like 'http://foo.com/bar/page.html?a=b#d'
+    // and url = an instance of URL.
+    let exiting = false;
+    const {dir, port, hrefs, timeout, verbose, followLinks} = options;
+    const urls = hrefs.map(v => new URL(v));
     const followLocal = followLinks === 'local' || followLinks === 'both';
     const followRemote = followLinks === 'remote' || followLinks === 'both';
+
+    // these maps map hrefs to UrlInfos
     const localURLInfoMap = new Map();
     const remoteURLInfoMap = new Map();
+    const foundURLInfoMap = new Map();
+
+    // Using href which means foo.com/bar, foo.com/bar?a=b, and foo.com/bar#def are all different
+    // Originally I thought that was a waste but each one might generate its own issues
+    function getUrlInfoFn(urlInfoMap) {
+      return function(url) {
+        let urlInfo = urlInfoMap.get(url.href);
+        const isNew = !urlInfo;
+        if (isNew) {
+          urlInfo = new UrlInfo(url);
+          urlInfoMap.set(url.href, urlInfo);
+        }
+        return {isNew, urlInfo};
+      };
+    }
+
+    const getLocalUrlInfo = getUrlInfoFn(localURLInfoMap);
+    const getRemoteUrlInfo = getUrlInfoFn(remoteURLInfoMap);
+    const getFoundUrlInfo = getUrlInfoFn(foundURLInfoMap);
+
     app.use(express.static(dir));
     const server = app.listen(port, () => {
       console.log(`Example app listening on port ${port}!`);
@@ -48,18 +84,24 @@ class Runner extends EventEmitter {
 
     async function test() {
       console.log('launching puppeteer');
-      let browser = await puppeteer.launch({
+      const browser = await puppeteer.launch({
         handleSIGINT: false,
       });
+      const page = await browser.newPage();
 
       const cleanup = async() => {
-        if (!browser) {
+        if (exiting) {
           return;
         }
 
-        const b = browser;
-        browser = undefined;
-        await b.close();
+        // I actually don't understand how to clean up here!
+        // I tried one thing and it seemed to work but then switching machines it stopped
+        // I see that even though I'm here other code is still running. I'm guessing it's
+        // the await which makes sense but it means I need to handle all the loops and stuff
+        // that are queued?
+        exiting = true;
+        await page.close();
+        await browser.close();
         server.close();
       };
       process.on('SIGINT', async() => {
@@ -67,14 +109,12 @@ class Runner extends EventEmitter {
         process.exit(0);  // eslint-disable-line no-process-exit
       });
 
-      const page = await browser.newPage();
-
       // this is needed because as of at least puppeteer 2.0.0 a heavy rAF loop
       // prevents `networkIdle2` from firing.
       const inject = fs.readFileSync(path.join(__dirname, 'inject.js'), 'utf8');
       await page.evaluateOnNewDocument(inject);
 
-      let currentURLString;
+      let currentHref;
       page.on('console', (msg) => {
         // Total Hack! Each string starts with `[JsHandle]`
         if (verbose) {
@@ -83,7 +123,7 @@ class Runner extends EventEmitter {
         if (msg.type() === 'error') {
           this.emit('error', {
             type: 'msg',
-            url: currentURLString,
+            href: currentHref,
             location: msg.location(),
             text: msg.text(),
             msg: [...msg.args().map(v => v.toString())].join(' '),
@@ -92,61 +132,45 @@ class Runner extends EventEmitter {
       });
 
       page.on('error', (e) => {
-        this.emit('error', {type: 'error', url: currentURLString, error: e});
+        this.emit('error', {type: 'error', href: currentHref, error: e});
       });
       page.on('pageerror', (e) => {
-        this.emit('error', {type: 'pageerror', url: currentURLString, error: e});
+        this.emit('error', {type: 'pageerror', href: currentHref, error: e});
+      });
+      page.on('response', response => {
+        const {urlInfo} = getFoundUrlInfo(new URL(response.url()));
+        if (!urlInfo.isStatusSet()) {
+          urlInfo.setStatus(response.status());
+        }
       });
 
-      function fullPathname(url) {
-        return `${url.origin}${url.pathname}`;
-      }
-
-      function getUrlInfoFn(urlInfoMap) {
-        return function(url) {
-          const pathname = fullPathname(url);
-          let urlInfo = urlInfoMap.get(pathname);
-          const isNew = !urlInfo;
-          if (isNew) {
-            urlInfo = new UrlInfo(url);
-            urlInfoMap.set(pathname, urlInfo);
-          }
-          return {isNew, urlInfo};
-        };
-      }
-
-      const getLocalUrlInfo = getUrlInfoFn(localURLInfoMap);
-      const getRemoteUrlInfo = getUrlInfoFn(remoteURLInfoMap);
-
-      async function addLinks(pageUrl, page, urls) {
+      async function addLinks(pageURL, page, urls) {
         const elemHandles = await page.$$('a');
-        const pageURL = new URL(pageUrl);
-        const pagePathname = fullPathname(pageURL);
         for (const elemHandle of elemHandles) {
-          const hrefHandle = await elemHandle.getProperty('href');
-          if (!hrefHandle) {
+          const linkHrefHandle = await elemHandle.getProperty('href');
+          if (!linkHrefHandle) {
             continue;
           }
-          const href = await hrefHandle.jsonValue();
-          if (!href) {
+          const linkHref = await linkHrefHandle.jsonValue();
+          if (!linkHref) {
             continue;
           }
-          debug('checking:', href);
-          const linkURL = new URL(href, pagePathname);
+          debug('checking:', linkHref);
+          const linkURL = new URL(linkHref, pageURL);
           const isLocalURL = pageURL.origin === linkURL.origin;
           if (isLocalURL) {
-            debug('  is local:', href);
+            debug('  is local:', linkHref);
             if (followLocal) {
               const {urlInfo, isNew} = getLocalUrlInfo(linkURL);
-              debug('    new:', isNew, href);
+              debug('    new:', isNew, linkHref);
               if (isNew) {
-                debug('    add:', href);
-                urls.push(linkURL.href);
+                debug('    add:', linkHref);
+                urls.push(linkURL);
               }
               urlInfo.addLink(pageURL);
             }
           } else {
-            debug('  is remote:', href);
+            debug('  is remote:', linkHref);
             const {urlInfo} = getRemoteUrlInfo(linkURL);
             urlInfo.addLink(pageURL);
           }
@@ -154,35 +178,38 @@ class Runner extends EventEmitter {
       }
 
       // add all the urls passed in.
-      urls.forEach(urlString => getLocalUrlInfo(new URL(urlString)));
+      urls.forEach(url => getLocalUrlInfo(url));
 
-      while (urls.length) {
-        const urlString = urls.shift();
-        const url = new URL(urlString);
-        const {urlInfo} = getLocalUrlInfo(url);
-        currentURLString = urlString;
-        this.emit('load', {url: urlString});
+      while (!exiting && urls.length) {
+        const url = urls.shift();
+        const href = url.href;
+        currentHref = href;
+        this.emit('load', {href});
         try {
-          const result = await page.goto(urlString, {waitUntil: 'networkidle2', timeout});
+          const result = await page.goto(href, {waitUntil: 'networkidle2', timeout});
           if (result.status() >= 200 && result.status() <= 299) {
-            urlInfo.setFound(true);
             if (followLinks !== 'none') {
-              await addLinks(urlString, page, urls);
+              await addLinks(url, page, urls);
             }
           }
         } catch (e) {
-          this.emit('error', {type: 'exception', url: currentURLString, error: e});
+          this.emit('error', {type: 'exception', href, error: e});
         }
-        this.emit('idle', {url: urlString, page});
+        this.emit('idle', {href, page});
       }
 
       const reportMissingLinks = (urlInfoMap) => {
-        for (const [linkPathname, urlInfo] of urlInfoMap) {
-          if (!urlInfo.found && urlInfo.links().length) {
+        if (exiting) {
+          return;
+        }
+        for (const [href, urlInfo] of urlInfoMap) {
+          const foundURLInfo = foundURLInfoMap.get(href);
+          if ((!foundURLInfo || !foundURLInfo.ok()) && urlInfo.links().length) {
             this.emit('error', {
               type: 'badlink',
-              url: linkPathname,
+              href,
               links: urlInfo.links(),
+              status: foundURLInfo ? foundURLInfo.status : -1,
             });
           }
         }
@@ -190,13 +217,14 @@ class Runner extends EventEmitter {
 
       reportMissingLinks(localURLInfoMap);
 
-      if (followRemote) {
-        for (const [/* linkPathname */, urlInfo] of remoteURLInfoMap.entries()) {
-          this.emit('load', {url: urlInfo.href});
+      if (!exiting && followRemote) {
+        for (const [href, remoteURLInfo] of remoteURLInfoMap) {
+          this.emit('load', {href});
           try {
-            const res = await fetch(urlInfo.href, {method: 'HEAD'});
-            if (res.ok) {
-              urlInfo.setFound();
+            const {urlInfo} = getFoundUrlInfo(remoteURLInfo.url);
+            if (!urlInfo.isStatusSet()) {
+              const res = await fetch(href, {method: 'HEAD'});
+              urlInfo.setStatus(res.status);
             }
           } catch (e) {
             //
@@ -206,7 +234,6 @@ class Runner extends EventEmitter {
         reportMissingLinks(remoteURLInfoMap);
       }
 
-      await page.close();
       await cleanup();
       this.emit('finish');
     }

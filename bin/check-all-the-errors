@@ -61,29 +61,29 @@ const error = (...args) => {
 
 const options = Object.assign({}, args, {
   dir: baseDir,
-  urls: files.map(v => `http://localhost:${args.port}${scanDir}/${v}`),
+  hrefs: files.map(v => `http://localhost:${args.port}${scanDir}/${v}`),
 });
 let numErrors = 0;
 const r = new Runner(options);
-r.on('load', (e) => log('load:', e.url));
+r.on('load', (e) => log('load:', e.href));
 // r.on('idle', (e) => log('done:', e.url));
 r.on('error', (e) => {
   ++numErrors;
   switch (e.type) {
     case 'msg':
-      error('error msg:', e.url, e.type, e.text, e.msg);
+      error('error msg:', e.href, e.type, e.text, e.msg);
       break;
     case 'exception':
-      error('exception:', e.url, e.type, e.error);
+      error('exception:', e.href, e.type, e.error);
       break;
     case 'error':
-      error('error:', e.url, e.type, e.error);
+      error('error:', e.href, e.type, e.error);
       break;
     case 'pageerror':
-      error('pageerror:', e.url, e.type, e.error);
+      error('pageerror:', e.href, e.type, e.error);
       break;
     case 'badlink':
-      error('missing link:', e.url, `  [linked from]\n  ${e.links.join('\n  ')}`);
+      error('missing link:', e.href, `[${e.status}] linked from\n  ${e.links.join('\n  ')}`);
       break;
     default:
       throw new Error('unhandled error type');
