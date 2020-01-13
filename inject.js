@@ -1,8 +1,7 @@
 // this file is injected into the browser on page load/navigation
 (function() {
-  const origRAF = window.requestAnimationFrame.bind(window);
-
-  let nextRAFId = 0;
+  let nextRAFId = 1;
+  let timeoutId;
 
   // need to keep callbacks around so we can cancel them. That includes
   // 2 callbacks added to the same frame where the first callback cancels the second
@@ -15,38 +14,46 @@
   const framesPerTick = 4;
   let frameCount = 0;
 
-  function rafProcess(time) {
+  function processCallbacks(callbacks, time) {
+    callbacks.forEach(function(callbackInfo, rafId) {
+      allCallbacks.delete(rafId);
+
+      // call in timeout because we don't want to deal with exceptions in callback
+      setTimeout(() => {
+        if (!callbackInfo.cancelled) {
+          callbackInfo.callback(time);
+        }
+      }, 0);
+    });
+  }
+
+  function rafProcess() {
+    timeoutId = undefined;
     ++frameCount;
     if (frameCount === framesPerTick) {
       frameCount = 0;
       const callbacks = pendingCallbacks;
       pendingCallbacks = new Map();
-      callbacks.forEach(function(callbackInfo, rafId) {
-        allCallbacks.delete(rafId);
-
-        // call in timeout because we don't want to deal with exceptions in callback
-        setTimeout(() => {
-          if (!callbackInfo.cancelled) {
-            callbackInfo.callback(time);
-          }
-        }, 0);
-      });
+      processCallbacks(callbacks, performance.now());
     }
-    origRAF(rafProcess);
   }
 
-  // maybe should only do this on first rAF
-  origRAF(rafProcess);
+  function queueRAF() {
+    if (!timeoutId) {
+      setTimeout(rafProcess, 200);
+    }
+  }
 
   window.requestAnimationFrame = function(callback) {
     const rafId = nextRAFId++;
     const callbackInfo = {callback, cancelled: false};
     allCallbacks.set(rafId, callbackInfo);
     pendingCallbacks.set(rafId, callbackInfo);
+    queueRAF();
     return rafId;
   };
 
-  window.cancelRequestAnimationFrame = function(rafId) {
+  window.cancelAnimationFrame = function(rafId) {
     const cb = allCallbacks.get(rafId);
     if (cb) {
       cb.cancelled = true;
