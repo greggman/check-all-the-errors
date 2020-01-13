@@ -1,5 +1,6 @@
 # TODO
 
+* fix timeout issue
 * add .check-all-the-errors.js config file
   * specify files .gitignore like 
   * add per file timeouts
@@ -10,7 +11,6 @@
 
 # Done
 
-* fix timeout issue
 * exit non 0 if errors
 * option to filter non-error console.log messages?
 * workaround puppeteer not cleaning up error
