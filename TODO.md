@@ -1,6 +1,8 @@
 # TODO
 
 * fix Ctrl-C issue
+* Save a report to some .json file
+* Take in that .JSON file with option to run only failing tests
 * Use different event for page "found"
 * add .check-all-the-errors.js config file
   * specify files .gitignore like 
