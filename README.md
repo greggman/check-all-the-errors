@@ -10,7 +10,7 @@ is to let you use some kind of say `.check-all-the-errors.js` file
 to specify which pages you want to check and specify per page options
 for errors or warnings to ignore, different timeouts, etc...
 
-As it is now you just give it a base path and a sub path. Example
+As it is now you just give it a base path and an optional sub path. Example
 
 ```
 check-all-the-errors /Users/me/myproject foobar
@@ -38,7 +38,7 @@ npm install -g check-all-the-errors
 ## Usage
 
 ```
-check-all-the-errors [options] basepath subpath
+check-all-the-errors [options] basepath [subpath]
 ```
 
 * `--help` displays help
@@ -48,5 +48,5 @@ check-all-the-errors [options] basepath subpath
 * `--follow-links=<type>` follow links (local, remote, both, none)
 
   note: local links will be loaded and checked for errors,
-  remote links will only be checked for a valid response.
+  remote links will only be checked for a valid response (200-299).
 
