@@ -72,7 +72,7 @@ class Runner extends EventEmitter {
       // this is needed because as of at least puppeteer 2.0.0 a heavy rAF loop
       // prevents `networkIdle2` from firing.
       const inject = fs.readFileSync(path.join(__dirname, 'inject.js'), 'utf8');
-      page.evaluateOnNewDocument(inject);
+      await page.evaluateOnNewDocument(inject);
 
       let currentURLString;
       page.on('console', (msg) => {
