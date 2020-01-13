@@ -178,7 +178,7 @@ class Runner extends EventEmitter {
 
       const reportMissingLinks = (urlInfoMap) => {
         for (const [linkPathname, urlInfo] of urlInfoMap) {
-          if (!urlInfo.found) {
+          if (!urlInfo.found && urlInfo.links().length) {
             this.emit('error', {
               type: 'badlink',
               url: linkPathname,
