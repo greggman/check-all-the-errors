@@ -7,7 +7,21 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "test",
+      "name": "tests",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${workspaceFolder}/bin/check-all-the-errors",
+      "args": [
+        "--follow-links=both",
+        "./test",
+        "tests"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "test webgl-fundamentals",
       "skipFiles": [
         "<node_internals>/**"
       ],
