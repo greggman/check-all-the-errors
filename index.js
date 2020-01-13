@@ -6,6 +6,8 @@ const EventEmitter = require('events');
 const app = express();
 const debug = require('debug')('check-all-the-things');
 const fetch = require('node-fetch');
+const fs = require('fs');
+const path = require('path');
 
 class UrlInfo {
   constructor(url) {
@@ -66,6 +68,11 @@ class Runner extends EventEmitter {
       });
 
       const page = await browser.newPage();
+
+      // this is needed because as of at least puppeteer 2.0.0 a heavy rAF loop
+      // prevents `networkIdle2` from firing.
+      const inject = fs.readFileSync(path.join(__dirname, 'inject.js'), 'utf8');
+      page.evaluateOnNewDocument(inject);
 
       let currentURLString;
       page.on('console', (msg) => {
