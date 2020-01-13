@@ -17,7 +17,7 @@ const optionSpec = {
     { option: 'verbose', alias: 'v', type: 'Boolean', description: 'print console.log from browser' },
     { option: 'follow-links',        type: 'String',  description: 'follow links', enum: ['local', 'remote', 'both', 'none'], default: 'none' },
   ],
-  prepend: 'Usage: check-all-the-errors [options] [path-to-serve] [subpath]',
+  prepend: 'Usage: check-all-the-errors [options] path-to-serve [subpath]',
   helpStyle: {
     typeSeparator: '=',
     descriptionSeparator: ' : ',
@@ -39,14 +39,14 @@ function printHelp() {
   process.exit(1);  // eslint-disable-line
 }
 
-if (args.help || args._.length !== 2) {
+if (args.help || args._.length < 1 || args._.length > 2) {
   printHelp();
 }
 
 const baseDir = args._[0];
-const scanDir = args._[1];
+const scanDir = args._[1] ? `/${args._[1]}` : '';
 
-const files = fs.readdirSync(`${baseDir}/${scanDir}`).filter(v => v.endsWith('.html'));
+const files = fs.readdirSync(`${baseDir}${scanDir}`).filter(v => v.endsWith('.html'));
 
 const logColor = (color, ...args) => {
   console.log(c[color]([...args].join(' ')));
@@ -61,7 +61,7 @@ const error = (...args) => {
 
 const options = Object.assign({}, args, {
   dir: baseDir,
-  urls: files.map(v => `http://localhost:${args.port}/${scanDir}/${v}`),
+  urls: files.map(v => `http://localhost:${args.port}${scanDir}/${v}`),
 });
 let numErrors = 0;
 const r = new Runner(options);
