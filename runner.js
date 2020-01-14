@@ -1,9 +1,7 @@
 /* eslint-env node */
 
 const puppeteer = require('puppeteer');
-const express = require('express');
 const EventEmitter = require('events');
-const app = express();
 const debug = require('debug')('check-all-the-things');
 const fetch = require('node-fetch');
 const fs = require('fs');
@@ -48,7 +46,7 @@ class Runner extends EventEmitter {
     // Let's try to keep the code so href = a string like 'http://foo.com/bar/page.html?a=b#d'
     // and url = an instance of URL.
     let exiting = false;
-    const {dir, port, hrefs, timeout, verbose, followLinks} = options;
+    const {hrefs, timeout, verbose, followLinks} = options;
     const urls = hrefs.map(v => new URL(v));
     const followLocal = followLinks === 'local' || followLinks === 'both';
     const followRemote = followLinks === 'remote' || followLinks === 'both';
@@ -76,14 +74,7 @@ class Runner extends EventEmitter {
     const getRemoteUrlInfo = getUrlInfoFn(remoteURLInfoMap);
     const getFoundUrlInfo = getUrlInfoFn(foundURLInfoMap);
 
-    app.use(express.static(dir));
-    const server = app.listen(port, () => {
-      console.log(`Example app listening on port ${port}!`);
-      test.call(this, port);
-    });
-
-    async function test() {
-      console.log('launching puppeteer');
+    const test = async() => {
       const browser = await puppeteer.launch({
         handleSIGINT: false,
       });
@@ -102,7 +93,6 @@ class Runner extends EventEmitter {
         exiting = true;
         await page.close();
         await browser.close();
-        server.close();
       };
       process.on('SIGINT', async() => {
         await cleanup();
@@ -236,7 +226,8 @@ class Runner extends EventEmitter {
 
       await cleanup();
       this.emit('finish');
-    }
+    };
+    test();
   }
 }
 
