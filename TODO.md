@@ -7,9 +7,7 @@
   * add per file timeouts
   * add filters for errors to be able to ignore expected errors
 * add simple puppeteer hook for page manipulation?
-* scan for open port
 * https (maybe use servez-lib?)
-* Allow testing remote server
 * option to not care about timeout 
   * to work around networkidle2 issue
   * because page does constant networking
@@ -17,6 +15,8 @@
 
 # Done
 
+* Allow testing remote server
+* scan for open port
 * Use different event for page "found"
 * fix Ctrl-C issue
 * fix timeout issue
