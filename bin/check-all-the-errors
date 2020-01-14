@@ -31,10 +31,10 @@ expand them in place.
 
 examples:
 
-  check-all-the-errors somedir              # eqv: somedir/*.html
-  check-all-the-errors somedir "*.html"     # eqv: somedir/*.html
-  check-all-the-errors somedir "**/*.html"  # eqv: somedir/**/*.html
-  check-all-the-errors somedir "foo/*.html" # eqv: somedir/foo/*.html
+  check-all-the-errors someDir              # eqv: someDir/*.html
+  check-all-the-errors someDir "*.html"     # eqv: someDir/*.html
+  check-all-the-errors someDir "**/*.html"  # eqv: someDir/**/*.html
+  check-all-the-errors someDir "foo/*.html" # eqv: someDir/foo/*.html
   `,
   helpStyle: {
     typeSeparator: '=',
