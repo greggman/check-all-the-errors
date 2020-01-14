@@ -3,7 +3,8 @@
 # check-all-the-errors
 
 A script to load a bunch of urls and report on any errors reported by the
-browser.
+browser. In particular JavaScript errors, bad urls (images, css), bad links,
+etc...
 
 This is a work in progress. My ultimate goal if I find the time
 is to let you use some kind of say `.check-all-the-errors.js` file
