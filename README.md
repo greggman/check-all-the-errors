@@ -63,11 +63,12 @@ check-all-the-errors somedir "foo/*.html" # eqv: somedir/foo/*.html
 
 * `--help` displays help
 * `--port=<num>` port (default: 8080), will chose this or higher
-* `--timeout=<ms>` the default timeout in ms (default: 5000)
+* `--timeout=<ms>` the default timeout in ms (default: 20000)
 * `--ignore-pattern=<glob>` a glob pattern to ignore (see glob node)
 * `--verbose` print console.log from browser
-* `--follow-links=<type>` follow links (local, remote, both, none)
+* `--output` output results to file in json'
 * `--dry-run` just print the initial list of files.
+* `--follow-links=<type>` follow links (local, remote, both, none)
 
   note: local links will be loaded and checked for errors,
   remote links will only be checked for a valid response (200-299).
