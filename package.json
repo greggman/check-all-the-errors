@@ -19,6 +19,14 @@
   },
   "author": "Gregg Tavares",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/greggman/check-all-the-errors.git"
+  },
+  "bugs": {
+    "url": "https://github.com/greggman/check-all-the-errors/issues"
+  },
+  "homepage": "https://github.com/greggman/check-all-the-errors",
   "dependencies": {
     "ansi-colors": "^4.1.1",
     "color-support": "^1.1.3",
