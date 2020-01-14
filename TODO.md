@@ -9,6 +9,11 @@
 * add simple puppeteer hook for page manipulation?
 * scan for open port
 * https (maybe use servez-lib?)
+* Allow testing remote server
+* option to not care about timeout 
+  * to work around networkidle2 issue
+  * because page does constant networking
+  * maybe optionally a function to wait for
 
 # Done
 
