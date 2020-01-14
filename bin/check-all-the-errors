@@ -15,6 +15,7 @@ const optionSpec = {
   options: [
     { option: 'help', alias: 'h',    type: 'Boolean',  description: 'displays help' },
     { option: 'port', alias: 'p',    type: 'Int',      description: 'port', default: '8080' },
+    { option: 'config', alias: 'c',  type: 'String',   description: 'config file' },
     { option: 'timeout',             type: 'Int',      description: 'the default timeout', default: '5000' },
     { option: 'verbose', alias: 'v', type: 'Boolean',  description: 'print console.log from browser' },
     { option: 'follow-links',        type: 'String',   description: 'follow links', enum: ['local', 'remote', 'both', 'none'], default: 'none' },
