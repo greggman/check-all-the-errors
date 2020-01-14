@@ -2,7 +2,7 @@
 
 const puppeteer = require('puppeteer');
 const EventEmitter = require('events');
-const debug = require('debug')('check-all-the-things');
+const debug = require('debug')('runner');
 const fetch = require('node-fetch');
 const fs = require('fs');
 const path = require('path');
@@ -10,17 +10,17 @@ const path = require('path');
 class UrlInfo {
   constructor(url) {
     this.url = url;
-    this.linkedFrom = new Set();
+    this.urlsLinkedFrom = new Set();
     this.responseStatus = -1;
   }
   get href() {
     return this.url.href;
   }
-  addLink(url) {
-    this.linkedFrom.add(url);
+  addLinkURL(url) {
+    this.urlsLinkedFrom.add(url);
   }
-  links() {
-    return Array.from(this.linkedFrom);
+  linkURLs() {
+    return Array.from(this.urlsLinkedFrom);
   }
   ok() {
     return this.responseStatus >= 200 && this.responseStatus <= 299;
@@ -106,7 +106,7 @@ class Runner extends EventEmitter {
 
       let currentHref;
       page.on('console', (msg) => {
-        // Total Hack! Each string starts with `[JsHandle]`
+        // Total Hack! Each string starts with `JsHandle:`
         if (verbose) {
           console.log(...msg.args().map(v => v.toString().substr(9)));
         }
@@ -116,7 +116,6 @@ class Runner extends EventEmitter {
             href: currentHref,
             location: msg.location(),
             text: msg.text(),
-            msg: [...msg.args().map(v => v.toString())].join(' '),
           });
         }
       });
@@ -131,6 +130,7 @@ class Runner extends EventEmitter {
         const {urlInfo} = getFoundUrlInfo(new URL(response.url()));
         if (!urlInfo.isStatusSet()) {
           urlInfo.setStatus(response.status());
+          this.emit('response', {href: response.url(), status: response.status()});
         }
       });
 
@@ -157,12 +157,12 @@ class Runner extends EventEmitter {
                 debug('    add:', linkHref);
                 urls.push(linkURL);
               }
-              urlInfo.addLink(pageURL);
+              urlInfo.addLinkURL(pageURL);
             }
           } else {
             debug('  is remote:', linkHref);
             const {urlInfo} = getRemoteUrlInfo(linkURL);
-            urlInfo.addLink(pageURL);
+            urlInfo.addLinkURL(pageURL);
           }
         }
       }
@@ -177,15 +177,20 @@ class Runner extends EventEmitter {
         this.emit('load', {href});
         try {
           const result = await page.goto(href, {waitUntil: 'networkidle2', timeout});
-          if (result.status() >= 200 && result.status() <= 299) {
+          const status = result.status();
+          this.emit('status', {href, status});
+          if (status >= 200 && status <= 299) {
             if (followLinks !== 'none') {
               await addLinks(url, page, urls);
             }
           }
         } catch (e) {
-          this.emit('error', {type: 'exception', href, error: e});
+          this.emit('error', {
+            type: 'exception',
+            href,
+            error: `${e.toString()}${e.message ? `:${e.message}` : ''}`,
+          });
         }
-        this.emit('idle', {href, page});
       }
 
       const reportMissingLinks = (urlInfoMap) => {
@@ -194,13 +199,16 @@ class Runner extends EventEmitter {
         }
         for (const [href, urlInfo] of urlInfoMap) {
           const foundURLInfo = foundURLInfoMap.get(href);
-          if ((!foundURLInfo || !foundURLInfo.ok()) && urlInfo.links().length) {
-            this.emit('error', {
-              type: 'badlink',
-              href,
-              links: urlInfo.links(),
-              status: foundURLInfo ? foundURLInfo.status : -1,
-            });
+          const status = foundURLInfo ? foundURLInfo.status : -1;
+          if ((!foundURLInfo || !foundURLInfo.ok()) && urlInfo.linkURLs().length) {
+            for (const linkURL of urlInfo.linkURLs()) {
+              this.emit('error', {
+                type: 'badlink',
+                href: linkURL.href,
+                link: href,
+                status: status,
+              });
+            }
           }
         }
       };
@@ -209,12 +217,13 @@ class Runner extends EventEmitter {
 
       if (!exiting && followRemote) {
         for (const [href, remoteURLInfo] of remoteURLInfoMap) {
-          this.emit('load', {href});
+          this.emit('loadRemote', {href});
           try {
             const {urlInfo} = getFoundUrlInfo(remoteURLInfo.url);
             if (!urlInfo.isStatusSet()) {
               const res = await fetch(href, {method: 'HEAD'});
               urlInfo.setStatus(res.status);
+              this.emit('response', {href, status: res.status});
             }
           } catch (e) {
             //
