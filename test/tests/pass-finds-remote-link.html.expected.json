@@ -1,0 +1,19 @@
+{
+  "numErrors": 0,
+  "pages": {
+    "http://localhost:8090/pass-finds-remote-link.html": {
+      "status": 200,
+      "errors": []
+    }
+  },
+  "responses": [
+    {
+      "href": "http://localhost:8090/pass-finds-remote-link.html",
+      "status": 200
+    },
+    {
+      "href": "https://google.com/",
+      "status": 200
+    }
+  ]
+}

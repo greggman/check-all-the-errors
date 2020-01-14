@@ -1,0 +1,21 @@
+{
+  "numErrors": 1,
+  "pages": {
+    "http://localhost:8090/fail-missing-remote-link.html": {
+      "status": 200,
+      "errors": [
+        {
+          "type": "badlink",
+          "link": "https://jreojejruhfwcnevurhvweodjwedjeiwodewdje.com/no-exists.html",
+          "status": -1
+        }
+      ]
+    }
+  },
+  "responses": [
+    {
+      "href": "http://localhost:8090/fail-missing-remote-link.html",
+      "status": 200
+    }
+  ]
+}

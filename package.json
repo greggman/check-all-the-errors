@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node bin/check-all-the-errors",
+    "test": "node test/test.js",
     "lint": "eslint --ext .js --ext .html .",
     "pre-push": "npm run lint"
   },

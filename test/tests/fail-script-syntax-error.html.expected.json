@@ -1,0 +1,20 @@
+{
+  "numErrors": 1,
+  "pages": {
+    "http://localhost:8090/fail-script-syntax-error.html": {
+      "status": 200,
+      "errors": [
+        {
+          "type": "pageerror",
+          "error": "Error: SyntaxError: Unexpected identifier"
+        }
+      ]
+    }
+  },
+  "responses": [
+    {
+      "href": "http://localhost:8090/fail-script-syntax-error.html",
+      "status": 200
+    }
+  ]
+}

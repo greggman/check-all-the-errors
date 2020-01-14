@@ -1,0 +1,20 @@
+{
+  "numErrors": 1,
+  "pages": {
+    "http://localhost:8090/fail-script-javascript-error.html": {
+      "status": 200,
+      "errors": [
+        {
+          "type": "pageerror",
+          "error": "Error: TypeError: console.foo is not a function\n    at http://localhost:8090/fail-script-javascript-error.html:2:9"
+        }
+      ]
+    }
+  },
+  "responses": [
+    {
+      "href": "http://localhost:8090/fail-script-javascript-error.html",
+      "status": 200
+    }
+  ]
+}

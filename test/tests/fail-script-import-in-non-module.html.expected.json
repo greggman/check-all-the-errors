@@ -1,0 +1,20 @@
+{
+  "numErrors": 1,
+  "pages": {
+    "http://localhost:8090/fail-script-import-in-non-module.html": {
+      "status": 200,
+      "errors": [
+        {
+          "type": "pageerror",
+          "error": "Error: SyntaxError: Cannot use import statement outside a module"
+        }
+      ]
+    }
+  },
+  "responses": [
+    {
+      "href": "http://localhost:8090/fail-script-import-in-non-module.html",
+      "status": 200
+    }
+  ]
+}

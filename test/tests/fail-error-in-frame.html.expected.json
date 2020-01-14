@@ -1,0 +1,31 @@
+{
+  "numErrors": 1,
+  "pages": {
+    "http://localhost:8090/fail-error-in-frame.html": {
+      "status": 200,
+      "errors": [
+        {
+          "type": "msg",
+          "location": {
+            "url": "http://localhost:8090/resources/not-exists.css"
+          },
+          "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+        }
+      ]
+    }
+  },
+  "responses": [
+    {
+      "href": "http://localhost:8090/fail-error-in-frame.html",
+      "status": 200
+    },
+    {
+      "href": "http://localhost:8090/fail-bad-css-link.html",
+      "status": 200
+    },
+    {
+      "href": "http://localhost:8090/resources/not-exists.css",
+      "status": 404
+    }
+  ]
+}

@@ -143,8 +143,8 @@ async function run(hrefs, args) {
     logger,
   });
   const runner = new Runner();
-  const tester = await runner.createTest();
-  const result = await runTests(tester, hrefs, options);
+  const tester = await runner.createTester();
+  const result = await runTests(tester, options);
   await runner.close();
   return result;
 }

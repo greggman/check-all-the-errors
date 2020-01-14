@@ -1,0 +1,37 @@
+{
+  "numErrors": 2,
+  "pages": {
+    "http://localhost:8090/fail-missing-local-link.html": {
+      "status": 200,
+      "errors": [
+        {
+          "type": "badlink",
+          "link": "http://localhost:8090/resources/no-exists.html",
+          "status": 404
+        }
+      ]
+    },
+    "http://localhost:8090/resources/no-exists.html": {
+      "status": 404,
+      "errors": [
+        {
+          "type": "msg",
+          "location": {
+            "url": "http://localhost:8090/resources/no-exists.html"
+          },
+          "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+        }
+      ]
+    }
+  },
+  "responses": [
+    {
+      "href": "http://localhost:8090/fail-missing-local-link.html",
+      "status": 200
+    },
+    {
+      "href": "http://localhost:8090/resources/no-exists.html",
+      "status": 404
+    }
+  ]
+}
