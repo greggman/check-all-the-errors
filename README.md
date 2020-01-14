@@ -28,7 +28,11 @@ I suspect it's of limited use. Most complex sites have a real testing
 suite and require far more manipulation of pages (clicking buttons etc)
 but for a mostly static site something simple like this might be useful.
 
-Maybe in the future I can add per page functions to manipulate the pages.
+Note you can also run it on a remote site by giving it urls. Example
+
+```
+check-all-the-errors --follow-links=local https://threejs.org
+```
 
 ## Installation
 
@@ -58,7 +62,7 @@ check-all-the-errors somedir "foo/*.html" # eqv: somedir/foo/*.html
 ### Options
 
 * `--help` displays help
-* `--port=<num>` port (default: 8080)
+* `--port=<num>` port (default: 8080), will chose this or higher
 * `--timeout=<ms>` the default timeout in ms (default: 5000)
 * `--ignore-pattern=<glob>` a glob pattern to ignore (see glob node)
 * `--verbose` print console.log from browser
