@@ -4,13 +4,13 @@
 
 const fs = require('fs');
 const path = require('path');
-const Runner = require('../runner');
-const debug = require('debug')('check-all-the-tnings');
 const colorSupport = require('color-support') || {};
 const makeOptions = require('optionator');
 const glob = require('glob');
 const ignore = require('ignore');
 const isURL = require('./is-url');
+const Runner = require('../lib/runner');
+const runTests = require('../lib/run-tests');
 
 const c = require('ansi-colors');
 c.enabled = colorSupport.hasBasic;
@@ -75,6 +75,8 @@ const error = (...args) => {
   logColor('red', ...args);
 };
 
+const logger = {log, error};
+
 async function main(args) {
   const baseDir = args._.shift();
   const isRemote = isURL(baseDir);
@@ -135,84 +137,14 @@ function runLocal(baseDir, args) {
   });
 }
 
-function run(hrefs) {
-  return new Promise((resolve) => {
-    const resultInfoMap = new Map();
-
-    function getResultInfo(href) {
-      let info = resultInfoMap.get(href);
-      if (!info) {
-        info = {
-          status: -1,  // not visited
-          errors: [],
-        };
-        resultInfoMap.set(href, info);
-      }
-      return info;
-    }
-
-    const options = Object.assign({}, args, {
-      hrefs,
-    });
-    const responses = [];
-    let numErrors = 0;
-    const r = new Runner(options);
-    // page that we're about to try to load
-    r.on('load', (e) => {
-      debug('load:', e.href);
-      getResultInfo(e.href);
-      log('load:', e.href);
-    });
-    // status of page that was loaded
-    r.on('status', (e) => {
-      debug('status:', e.href, e.status);
-      getResultInfo(e.href).status = e.status;
-    });
-    // status of network requests (html, jpg, png, css, etc)
-    r.on('response', (e) => {
-      debug('response:', e.href, e.status);
-      // note: if a page fails to finish we may have downloaded the page
-      // but some error prevented it from running/timedout etc...
-      const info = resultInfoMap.get(e.href);
-      if (info) {
-        info.status = e.status;
-      }
-      responses.push(e);
-    });
-    // errors of all types
-    r.on('error', (e) => {
-      ++numErrors;
-      const info = getResultInfo(e.href);
-      const err = Object.assign({}, e);
-      delete err.href;
-      info.errors.push(err);
-      switch (e.type) {
-        case 'msg':
-          error('error msg:', e.href, e.type, e.text, e.msg);
-          break;
-        case 'exception':
-          error('exception:', e.href, e.type, e.error);
-          break;
-        case 'error':
-          error('error:', e.href, e.type, e.error);
-          break;
-        case 'pageerror':
-          error('pageerror:', e.href, e.type, e.error);
-          break;
-        case 'badlink':
-          error('missing link:', e.link, `[${e.status}] referenced by ${e.href}`);
-          break;
-        default:
-          throw new Error('unhandled error type');
-      }
-    });
-    r.on('finish', () => {
-      log('---done---');
-      resolve({
-        numErrors,
-        pages: Object.fromEntries(resultInfoMap.entries()),
-        responses,
-      });
-    });
+async function run(hrefs, args) {
+  const options = Object.assign({}, args, {
+    hrefs,
+    logger,
   });
+  const runner = new Runner();
+  const tester = await runner.createTest();
+  const result = await runTests(tester, hrefs, options);
+  await runner.close();
+  return result;
 }
