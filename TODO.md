@@ -1,6 +1,5 @@
 # TODO
 
-* Save a report to some .json file
 * Take in that .JSON file with option to run only failing tests
 * add .check-all-the-errors.js config file
   * specify files .gitignore like 
@@ -15,6 +14,7 @@
 
 # Done
 
+* Save a report to some .json file
 * Allow testing remote server
 * scan for open port
 * Use different event for page "found"
