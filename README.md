@@ -68,3 +68,6 @@ check-all-the-errors somedir "foo/*.html" # eqv: somedir/foo/*.html
   note: local links will be loaded and checked for errors,
   remote links will only be checked for a valid response (200-299).
 
+## License
+
+[MIT](LICENSE.md)
