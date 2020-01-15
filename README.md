@@ -34,6 +34,24 @@ Note you can also run it on a remote site by giving it urls. Example
 check-all-the-errors --follow-links=local https://threejs.org
 ```
 
+Similarly you can test it with some other server. For example
+
+```
+& servez /path/to/website
+check-all-the-errors --follow-links=local http://localhost:8080/index.html
+```
+
+This is especially useful if your server does things like respond to path
+to a folder with `index.php` or `whateveryouconfigured.somext`.
+
+Note: I can also be helpful to generate/create your own page of links.
+For example [threejsfundamentals.org's](https://threejsfundamentals.org)
+site builder generates [a page with links to each language](https://threejsfundamentals.org/link-check.html).
+since there are no natural links across languages. Passing that page with `--follow-links=local`
+will end up finding all pages on the site. Of course you could also pass in
+each of those pages but then if new languages are added you'd have to manually
+update your configuration.
+
 ## Installation
 
 ```
