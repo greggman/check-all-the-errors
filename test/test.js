@@ -50,10 +50,13 @@ server.on('start', ({baseUrl}) => {
 });
 
 async function run(baseUrl) {
-  let numErrors;
+  //const urlToIdFn = url => `${url.origin}${url.pathname}${useSearch ? url.search : ''}${useHash ? url.hash : ''}`,
+  const urlToIdFn = url => `${url.origin}${url.pathname}`;
+  //const urlToIdFn = url => url.href;
+  let numErrors = 0;
   const runner = new Runner();
   for (const filename of filenames) {
-    console.log('test:', filename);
+    console.log('test :', filename);
     const hrefs = [
       `${baseUrl}/${filename}`,
     ];
@@ -61,6 +64,7 @@ async function run(baseUrl) {
       hrefs,
       timeout: 5000,
       followLinks: 'both',
+      urlToIdFn,
     };
     const tester = await runner.createTester();
     const result = await runTests(tester, options);

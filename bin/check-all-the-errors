@@ -21,6 +21,8 @@ const optionSpec = {
     { option: 'port', alias: 'p',    type: 'Int',      description: 'port', default: '8080' },
     { option: 'timeout',             type: 'Int',      description: 'the default timeout', default: '5000' },
     { option: 'follow-links',        type: 'String',   description: 'follow links', enum: ['local', 'remote', 'both', 'none'], default: 'none' },
+    { option: 'use-hash',            type: 'Boolean',  description: 'consider hashes different pages. eg foo.com/a#b vs foo.com/a#c'},
+    { option: 'use-search',          type: 'Boolean',  description: 'consider searches different pages. eg foo.com?a=b vs foo.com?a=c'},
     { option: 'ignore-pattern',      type: '[String]', description: 'glob to ignore', concatRepeatedArrays: true },
     { option: 'dry-run',             type: 'Boolean',  description: 'show the list of files to check and exit'},
     { option: 'output', alias: 'o',  type: 'String',   description: 'output results to file in json'},
@@ -139,9 +141,13 @@ function runLocal(baseDir, args) {
 }
 
 async function run(hrefs, args) {
+  const {useSearch, useHash} = args;
+  const urlToIdFn = url => `${url.origin}${url.pathname}${useSearch ? url.search : ''}${useHash ? url.hash : ''}`;
+
   const options = Object.assign({}, args, {
     hrefs,
     logger,
+    urlToIdFn,
   });
   const runner = new Runner();
   const tester = await runner.createTester();
