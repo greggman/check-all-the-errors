@@ -15,7 +15,19 @@
       "args": [
         "--follow-links=both",
         "./test",
-        "tests"
+        "tests/*.html"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "one test",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${workspaceFolder}/test/test.js",
+      "args": [
+        "--filter=hashes"
       ]
     },
     {
@@ -29,7 +41,21 @@
       "args": [
         "--follow-links=local",
         "../webgl-fundamentals/out",
-        "webgl/lessons"
+        "webgl/lessons/*.html"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "test threejsfundamentals",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${workspaceFolder}/bin/check-all-the-errors",
+      "args": [
+        "--timeout=2500000",
+        "/Users/gregg/src/threejsfundamentals.org/out",
+        "threejs/lessons/ru/threejs-primitives.html"
       ]
     }
   ]
