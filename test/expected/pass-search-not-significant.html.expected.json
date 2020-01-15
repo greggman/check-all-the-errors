@@ -1,0 +1,25 @@
+{
+  "numErrors": 0,
+  "pages": {
+    "http://localhost:8090/pass-search-not-significant.html": {
+      "status": 200,
+      "errors": []
+    },
+    "http://localhost:8090/resources/noop.html": {
+      "status": 200,
+      "errors": []
+    }
+  },
+  "responses": [
+    {
+      "href": "http://localhost:8090/pass-search-not-significant.html",
+      "resourceHref": "http://localhost:8090/pass-search-not-significant.html",
+      "status": 200
+    },
+    {
+      "href": "http://localhost:8090/resources/noop.html?abc=def",
+      "resourceHref": "http://localhost:8090/resources/noop.html?abc=def",
+      "status": 200
+    }
+  ]
+}
