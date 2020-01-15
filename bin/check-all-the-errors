@@ -126,6 +126,7 @@ function runLocal(baseDir, args) {
       root: baseDir,
       port: args.port,
       scan: true,
+      index: true,
     }));
     server.on('start', ({baseUrl}) => {
       process.nextTick(async() => {
