@@ -64,13 +64,14 @@ async function run(baseUrl) {
     };
     const tester = await runner.createTester();
     const result = await runTests(tester, options);
-    const expectedFilename = path.join(baseDir, `${filename}.expected.json`);
+    const expectedFilename =  `${filename}.expected.json`;
+    const expectedFilePath = path.join(baseDir, '..', 'expected', expectedFilename);
     if (args.writeExpectedResults) {
       console.log('write:', expectedFilename);
-      fs.writeFileSync(expectedFilename, JSON.stringify(result, null, 2));
+      fs.writeFileSync(expectedFilePath, JSON.stringify(result, null, 2));
     } else {
-      const expected = JSON.parse(fs.readFileSync(expectedFilename, 'utf8'));
       try {
+        const expected = JSON.parse(fs.readFileSync(expectedFilePath, 'utf8'));
         assert.deepStrictEqual(result, expected);
         console.log(' pass');
       } catch (e) {
