@@ -11,6 +11,21 @@
   * to work around networkidle2 issue
   * because page does constant networking
   * maybe optionally a function to wait for
+* option to not care about hash
+  
+  The issue here is current `http://foo.com/abc#bar` and `http://foo.com/abc#moo`
+  are considered 2 different pages. Why? Because the page might read the hash
+  and execute some JS. We'd like to know if it fails. But, it means extra checks
+  and 2 different pages referencing those urls will not be considered to reference
+  the same page.
+
+* option to not care about search
+
+  The issue here is current `http://foo.com/abc?a=b` and `http://foo.com/abc?a=c`
+  are considered 2 different pages. Why? Because the page/server might read the searchstring
+  and execute some JS. We'd like to know if it fails. But, it means extra checks
+  and 2 different pages referencing those urls will not be considered to reference
+  the same page.
 
 # Done
 
