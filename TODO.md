@@ -27,6 +27,11 @@
   and 2 different pages referencing those urls will not be considered to reference
   the same page.
 
+* consolidate URLs in report
+  * `https://foo.bar#abc` and `https://foo.bar#dev` show up separately on purpose
+     but it's clutter to have the same errors. Change report to have baseURL (no query, no hash)
+     but under list errors specific ot each page?
+
 # Done
 
 * Save a report to some .json file
