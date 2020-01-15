@@ -5,6 +5,11 @@
       "status": 200,
       "errors": [
         {
+          "type": "badResponse",
+          "href": "http://localhost:8090/resources/not-exists.css",
+          "status": 404
+        },
+        {
           "type": "msg",
           "location": {
             "url": "http://localhost:8090/resources/not-exists.css"
@@ -17,10 +22,12 @@
   "responses": [
     {
       "href": "http://localhost:8090/fail-bad-css-link.html",
+      "resourceHref": "http://localhost:8090/fail-bad-css-link.html",
       "status": 200
     },
     {
-      "href": "http://localhost:8090/resources/not-exists.css",
+      "href": "http://localhost:8090/fail-bad-css-link.html",
+      "resourceHref": "http://localhost:8090/resources/not-exists.css",
       "status": 404
     }
   ]

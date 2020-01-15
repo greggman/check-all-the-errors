@@ -13,10 +13,12 @@
   "responses": [
     {
       "href": "http://localhost:8090/pass-finds-local-link.html",
+      "resourceHref": "http://localhost:8090/pass-finds-local-link.html",
       "status": 200
     },
     {
       "href": "http://localhost:8090/resources/noop.html",
+      "resourceHref": "http://localhost:8090/resources/noop.html",
       "status": 200
     }
   ]

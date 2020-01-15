@@ -9,10 +9,12 @@
   "responses": [
     {
       "href": "http://localhost:8090/pass-finds-remote-link.html",
+      "resourceHref": "http://localhost:8090/pass-finds-remote-link.html",
       "status": 200
     },
     {
       "href": "https://google.com/",
+      "resourceHref": "https://google.com/",
       "status": 200
     }
   ]

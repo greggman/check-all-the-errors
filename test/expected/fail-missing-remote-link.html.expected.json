@@ -15,6 +15,7 @@
   "responses": [
     {
       "href": "http://localhost:8090/fail-missing-remote-link.html",
+      "resourceHref": "http://localhost:8090/fail-missing-remote-link.html",
       "status": 200
     }
   ]

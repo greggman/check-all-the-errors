@@ -14,6 +14,7 @@
   "responses": [
     {
       "href": "http://localhost:8090/fail-script-javascript-error.html",
+      "resourceHref": "http://localhost:8090/fail-script-javascript-error.html",
       "status": 200
     }
   ]
