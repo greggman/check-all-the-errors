@@ -12,6 +12,7 @@ const optionSpec = {
   options: [
     { option: 'help', alias: 'h',       type: 'Boolean',  description: 'displays help' },
     { option: 'write-expected-results', type: 'Boolean',  description: 'write expected test results' },
+    { option: 'filter',                 type: 'String',   description: 'filter to use.', default: '\\.html$'},
   ],
 };
 const optionator = makeOptions(optionSpec);
@@ -35,8 +36,9 @@ if (args.help) {
 
 const baseDir = path.join(__dirname, 'tests');
 
+const filterRE = new RegExp(args.filter);
 const filenames = fs.readdirSync(baseDir)
-    .filter(v => v.endsWith('.html'));
+    .filter(v => filterRE.test(v));
 
 const server = new Servez(Object.assign({
   root: baseDir,
