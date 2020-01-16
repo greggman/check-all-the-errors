@@ -52,9 +52,9 @@ server.on('start', ({baseUrl}) => {
 });
 
 async function run(baseUrl) {
-  //const urlToIdFn = url => `${url.origin}${url.pathname}${useSearch ? url.search : ''}${useHash ? url.hash : ''}`,
-  const urlToIdFn = url => `${url.origin}${url.pathname}`;
-  //const urlToIdFn = url => url.href;
+  const useSearch = true;
+  const useHash = false;
+  const urlToIdFn = url => `${url.origin}${url.pathname}${useSearch ? url.search : ''}${useHash ? url.hash : ''}`;
   let numErrors = 0;
   const runner = new Runner();
   for (const filename of filenames) {
