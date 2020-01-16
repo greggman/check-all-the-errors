@@ -40,11 +40,12 @@ const filterRE = new RegExp(args.filter);
 const filenames = fs.readdirSync(baseDir)
     .filter(v => filterRE.test(v));
 
-const server = new Servez(Object.assign({
+const server = new Servez({
   root: baseDir,
   port: 8090,
   scan: true,
-}));
+  index: true,
+});
 server.on('start', ({baseUrl}) => {
   process.nextTick(() => {
     run(baseUrl);
