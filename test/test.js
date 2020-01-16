@@ -12,7 +12,7 @@ const optionSpec = {
   options: [
     { option: 'help', alias: 'h',       type: 'Boolean',  description: 'displays help' },
     { option: 'write-expected-results', type: 'Boolean',  description: 'write expected test results' },
-    { option: 'filter',                 type: 'String',   description: 'filter to use.', default: '\\.html$'},
+    { option: 'filter',                 type: 'String',   description: 'filter regex to use.', default: '\\.html$'},
   ],
 };
 const optionator = makeOptions(optionSpec);
