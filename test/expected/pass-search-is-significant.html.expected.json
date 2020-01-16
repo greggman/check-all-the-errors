@@ -1,0 +1,43 @@
+{
+  "numErrors": 0,
+  "pages": {
+    "http://localhost:8090/pass-search-is-significant.html": {
+      "status": 200,
+      "errors": []
+    },
+    "http://localhost:8090/resources/noop.html?abc=def": {
+      "status": 200,
+      "errors": []
+    },
+    "http://localhost:8090/resources/noop.html": {
+      "status": 200,
+      "errors": []
+    },
+    "http://localhost:8090/resources/noop.html?abc=xyz": {
+      "status": 200,
+      "errors": []
+    }
+  },
+  "responses": [
+    {
+      "href": "http://localhost:8090/pass-search-is-significant.html",
+      "resourceHref": "http://localhost:8090/pass-search-is-significant.html",
+      "status": 200
+    },
+    {
+      "href": "http://localhost:8090/resources/noop.html?abc=def",
+      "resourceHref": "http://localhost:8090/resources/noop.html?abc=def",
+      "status": 200
+    },
+    {
+      "href": "http://localhost:8090/resources/noop.html",
+      "resourceHref": "http://localhost:8090/resources/noop.html",
+      "status": 200
+    },
+    {
+      "href": "http://localhost:8090/resources/noop.html?abc=xyz",
+      "resourceHref": "http://localhost:8090/resources/noop.html?abc=xyz",
+      "status": 200
+    }
+  ]
+}
