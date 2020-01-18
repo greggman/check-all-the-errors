@@ -84,7 +84,7 @@ check-all-the-errors somedir "foo/*.html" # eqv: somedir/foo/*.html
 * `--timeout=<ms>` the default timeout in ms (default: 20000)
 * `--ignore-pattern=<glob>` a glob pattern to ignore (see glob node)
 * `--verbose` print console.log from browser
-* `--output` output results to file in json'
+* `--output` output results to file as json
 * `--dry-run` just print the initial list of files.
 * `--follow-links=<type>` follow links (local, remote, both, none)
 
