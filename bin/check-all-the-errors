@@ -26,7 +26,7 @@ const optionSpec = {
     { option: 'ignore-pattern',      type: '[String]', description: 'glob to ignore', concatRepeatedArrays: true },
     { option: 'dry-run',             type: 'Boolean',  description: 'show the list of files to check and exit'},
     { option: 'output', alias: 'o',  type: 'String',   description: 'output results to file in json'},
-    { option: 'verbose', alias: 'v', type: 'Boolean',  description: 'print console.log from browser' },
+    { option: 'verbose', alias: 'v', type: 'Boolean',  description: 'print console output from browser' },
   ],
   prepend: `Usage: check-all-the-errors [options] path-to-serve-or-url [...globs-or-urls]
 
@@ -40,6 +40,8 @@ examples:
   check-all-the-errors someDir "*.html"     # eqv: someDir/*.html
   check-all-the-errors someDir "**/*.html"  # eqv: someDir/**/*.html
   check-all-the-errors someDir "foo/*.html" # eqv: someDir/foo/*.html
+
+  check-all-the-errors --follow-links=local https://example.com/page.html
   `,
   helpStyle: {
     typeSeparator: '=',
