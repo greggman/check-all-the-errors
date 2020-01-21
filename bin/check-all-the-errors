@@ -19,7 +19,7 @@ const optionSpec = {
   options: [
     { option: 'help', alias: 'h',    type: 'Boolean',  description: 'displays help' },
     { option: 'port', alias: 'p',    type: 'Int',      description: 'port', default: '8080' },
-    { option: 'timeout',             type: 'Int',      description: 'the default timeout', default: '5000' },
+    { option: 'timeout',             type: 'Int',      description: 'the default timeout', default: '20000' },
     { option: 'follow-links',        type: 'String',   description: 'follow links', enum: ['local', 'remote', 'both', 'none'], default: 'none' },
     { option: 'use-hash',            type: 'Boolean',  description: 'consider hashes different pages. eg foo.com/a#b vs foo.com/a#c', default: 'false'},
     { option: 'use-search',          type: 'Boolean',  description: 'consider searches different pages. eg foo.com?a=b vs foo.com?a=c', default: 'true'},
