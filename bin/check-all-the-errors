@@ -24,6 +24,7 @@ const optionSpec = {
     { option: 'use-hash',            type: 'Boolean',  description: 'consider hashes different pages. eg foo.com/a#b vs foo.com/a#c', default: 'false'},
     { option: 'use-search',          type: 'Boolean',  description: 'consider searches different pages. eg foo.com?a=b vs foo.com?a=c', default: 'true'},
     { option: 'ignore-pattern',      type: '[String]', description: 'glob to ignore', concatRepeatedArrays: true },
+    { option: 'config', alias: 'c',  type: 'String',   description: 'config file, default is .check-all-the-errors.js in dir or local dir'},
     { option: 'dry-run',             type: 'Boolean',  description: 'show the list of files to check and exit'},
     { option: 'output', alias: 'o',  type: 'String',   description: 'output results to file in json'},
     { option: 'verbose', alias: 'v', type: 'Boolean',  description: 'print console output from browser' },
@@ -78,12 +79,51 @@ const log = (...args) => {
 const error = (...args) => {
   logColor('red', ...args);
 };
+const info = args.verbose ? (...args) => {
+  logColor('yellow', ...args);
+} : () => {};
 
-const logger = {log, error};
+const logger = {log, error, info};
+
+function exists(filename) {
+  try {
+    fs.statSync(filename);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function loadConfigImpl(filename) {
+  logger.info('load config:', filename);
+  return require(path.resolve(filename));
+}
+
+function loadConfig(isRemote, baseDir, filename) {
+  if (filename) {
+    return loadConfigImpl(filename);
+  }
+  const name = '.check-all-the-errors.js';
+  if (!isRemote) {
+    filename = path.join(baseDir, name);
+    if (exists(filename)) {
+      return loadConfigImpl(filename);
+    }
+  }
+  filename = name;
+  if (exists(filename)) {
+    return loadConfigImpl(filename);
+  }
+  return {};
+}
 
 async function main(args) {
   const baseDir = args._.shift();
   const isRemote = isURL(baseDir);
+  const config = loadConfig(isRemote, baseDir, args.config);
+  args = Object.assign({
+    expectedErrors: [],
+  }, config, args);
   const result = await (isRemote ? runRemote(baseDir, args) : runLocal(baseDir, args));
   let exitCode = result.numErrors ? 1 : 0;
   if (!args.dryRun) {
