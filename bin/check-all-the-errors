@@ -123,7 +123,7 @@ async function main(args) {
   const config = loadConfig(isRemote, baseDir, args.config);
   args = Object.assign({
     expectedErrors: [],
-  }, config, args);
+  }, args, config);
   const result = await (isRemote ? runRemote(baseDir, args) : runLocal(baseDir, args));
   let exitCode = result.numErrors ? 1 : 0;
   if (!args.dryRun) {
