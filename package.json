@@ -36,7 +36,7 @@
     "ignore": "^5.1.4",
     "node-fetch": "^2.6.0",
     "optionator": "^0.8.3",
-    "puppeteer": "^2.0.0",
+    "puppeteer": "^8.0.0",
     "servez-lib": "^1.6.0"
   },
   "devDependencies": {
